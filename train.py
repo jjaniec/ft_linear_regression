@@ -15,24 +15,60 @@ from ft_linear_regression.classes.linearRegressionDataframe import linearRegress
 # https://www.miximum.fr/blog/premiers-tests-avec-le-machine-learning/
 # https://mrmint.fr/gradient-descent-algorithm
 
+def key_press_handler(event):
+	if event.key == 'escape':
+		plt.close()
+		sys.exit(0)
+
+def draw_predict_line(linreg_df: object) -> None:
+	x = [
+		max(linreg_df.df['km']),
+		min(linreg_df.df['km'])
+	]
+	y = [
+		linreg_df.predict(max(linreg_df.df['km'])),
+		linreg_df.predict(min(linreg_df.df['km']))
+	]
+	print(x, y)
+	plt.plot(x, y, 'r-', lw=2)
+
+def show_cost_history_graph(linreg_df: object) -> None:
+	figure = plt.gcf()
+	figure.canvas.set_window_title(CANVAS_WINDOW_TITLES)
+	figure.canvas.mpl_connect('key_press_event', key_press_handler)
+	plt.plot(range(linreg_df.max_iter), linreg_df.cost_history)
+	plt.title("Cost history")
+	plt.show()
+
+def	show_linreg_graph(linreg_df: object) -> None:
+	figure = plt.gcf()
+	figure.canvas.set_window_title(CANVAS_WINDOW_TITLES)
+	figure.canvas.mpl_connect('key_press_event', key_press_handler)
+	plt.scatter(linreg_df.df.km, linreg_df.df.price)
+	draw_predict_line(linreg_df)
+	plt.title("Linear regression")
+	plt.xlabel('km')
+	plt.ylabel('price')
+	plt.show()
+
 def main(dataframe_file: str) -> Union[None, Tuple[float, float]]:
-	linreg_df = linearRegressionDataframe(dataframe_file)
+	df = pd.read_csv(dataframe_file)
+	linreg_df = linearRegressionDataframe(df)
+	linreg_df.max_iter = DEFAULT_MAX_ITER
 	linreg_df.normalize(linreg_df.df.price.max(), linreg_df.df.km.max())
-	df = linreg_df.df
 	print(f"Imported dataframe: m = {linreg_df.m}, n = {linreg_df.n}, target = \"{DATAFRAME_TARGET}\"")
 	theta = [0, 0]
 	for i in range(0, DEFAULT_MAX_ITER):
-		derivative_theta = linreg_df.derivate_theta(theta[0], theta[1])
+		derivative_theta = linreg_df.derivate_theta(theta)
 		theta = linreg_df.gradient_descent(theta, derivative_theta)
-		linreg_df.cost_history.append(linreg_df.j(theta[0], theta[1]))
-		print(f"j({theta[0]}, {theta[1]}) = {linreg_df.j(theta[0], theta[1])}")
-	print(len(linreg_df.cost_history), len(range(DEFAULT_MAX_ITER)))
-	print(linreg_df.cost_history)
-	# df.plot.scatter(x=linreg_df.y, y=linreg_df.x1)
-	plt.plot(range(DEFAULT_MAX_ITER), linreg_df.cost_history)
-	plt.title("Cost function")
-	plt.show()
-	return (theta)
+		linreg_df.cost_history.append(linreg_df.j(theta))
+		print(f"j({theta[0]}, {theta[1]}) = {linreg_df.j(theta)}")
+	linreg_df.theta = theta
+	linreg_df.restore_normalize_df()
+	linreg_df.restore_normalize_theta()
+	show_cost_history_graph(linreg_df)
+	show_linreg_graph(linreg_df)
+	return (linreg_df.theta)
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
