@@ -1,6 +1,8 @@
 # Ft_linear_regression
 
-Supervised learning linear regression
+Supervised learning introduction
+
+![](./img/training.png)
 
 ## Setup
 
@@ -10,6 +12,34 @@ source venv/bin/activate
 pip install -r requirements.txt
 ./train.py
 ./predict.py
+```
+
+## Usage
+
+```bash
+❯ ./train.py
+Usage: train.py [options] dataset_file
+
+Options:
+  -h, --help            show this help message and exit
+  -v, --visualize       show cost history & regression graph
+  -q, --quiet           hides every stdout output
+  -a ALPHA, --alpha=ALPHA, --learning-rate=ALPHA
+                        train using specified learning rate
+  -i MAX_ITER, --max-iter=MAX_ITER
+                        train using specified max_iter
+  -l, --least-square    train using the least square algorithm (more precise
+                        but slow with big datasets)
+```
+
+```bash
+❯ ./predict.py -h
+Usage: predict.py [options] km_value
+
+Options:
+  -h, --help            show this help message and exit
+  -f FILE, --theta-file=FILE
+                        file containing theta values
 ```
 
 ## Propreties
@@ -65,4 +95,5 @@ j(a, b) = (1 / 2m) * (sum of: for i in dataset: (f(xi) - yi) )^2
 
 ### Error minimisation algorithm
 
-Gradient Descent
+Gradient descent by default
+or least square method using the `-l` option on `train.py`
